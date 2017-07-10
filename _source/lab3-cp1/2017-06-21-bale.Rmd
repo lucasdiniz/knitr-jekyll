@@ -1,0 +1,92 @@
+---
+layout: post
+title: "A carreira de Christian Bale"
+published: true
+tags: [htmlwidgets, plotly, r]
+---
+
+O famoso e renomado ator britânico Christian Bale é mais conhecido pelos três filmes em que encarnou o personagem de Bruce Wayne, o Batman. Nenhum ator que fez tantos filmes como Bale gostaria de ser reconhecido apenas como __"o cara que fez o Batman"__ contudo, de todos os filmes que Bale atuou os três da trilogia Batman foram os que arrecadaram a maior bilheteria, mais de $75 milhões de doláres a frente de _Terminator : Salvation_ de 2008, o quarto filme que mais arrecadou.
+
+Vejamos detalhes de sua carreira:  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(tidyverse, warn.conflicts = F)
+library(rvest)
+library(plotly)
+library(cluster)
+theme_set(theme_light())
+
+
+from_page <- read_csv("dados.csv")
+
+filmes = from_page %>% 
+    filter(RATING != "No Score Yet", 
+           `BOX OFFICE` != "—", 
+           CREDIT != "Executive Producer") %>%
+    mutate(RATING = as.numeric(gsub("%", "", RATING)), 
+           `BOX OFFICE` = as.numeric(gsub("[$|M]", "", `BOX OFFICE`))) %>% filter(!is.na(`BOX OFFICE`)) %>% arrange(`BOX OFFICE`)
+
+row.names(filmes) = NULL
+
+agrupamento_h_2d = filmes %>% 
+    column_to_rownames("TITLE") %>% 
+    select(`BOX OFFICE`, RATING) %>%
+    mutate_all(funs(scale)) %>%
+    dist(method = "euclidean") %>% 
+    hclust(method = "centroid")
+
+
+grouped_filmes = tibble(k = 4) %>% 
+group_by(k) %>% 
+do(cbind(filmes, 
+         grupo = as.character(cutree(agrupamento_h_2d, .$k)))) 
+
+maxRow = grouped_filmes %>% group_by(grupo) %>% filter(`BOX OFFICE` == max(`BOX OFFICE`))
+
+a = list(
+  x = maxRow$RATING,
+  y = maxRow$`BOX OFFICE`,
+  text = c(paste(maxRow$TITLE, "(", maxRow$YEAR, ")")),
+  xref = "x",
+  yref = "y",
+  ax = 37,
+  ay = -30,
+  showarrow = TRUE,
+  arrowhead = 2,
+  arrowsize = .5,
+  font = list(family = "bank gothic", size = 12),
+  xanchor = "right"
+)
+
+go = c("Harsh Times", "I'm not Hipster", "The Beginning", "The Rise")
+plot_ly(grouped_filmes %>% mutate(grupo = go[grupo]),
+        x = ~RATING,
+        y = ~`BOX OFFICE`,
+        color = ~grupo,
+        type = "scatter",
+        mode = "markers",
+        marker = list(size = 10),
+        hoverinfo = "text",
+        text = ~paste("<b>",TITLE,"(", YEAR,")</b><br><b>Bilheteria:</b> $", `BOX OFFICE`, "milhões<br><b>Nota:</b>", RATING,"/100")) %>% 
+  layout(annotations = a,
+         title = "A carreira de Bale",
+         xaxis = list(title = "Nota no Rotting Tomatoes"),
+         yaxis  = list(title = "Bilheteria"))
+
+```
+
+
+
+<h2>Harsh Times</h2>
+Nesse grupo foram incluídos a maioria dos filmes que poderiamos chamar de "ruins". Entre filmes de acão com plots esquisitos como _Terminator : Salvation_ (que ainda conseguiu uma bilheteria considerável devido ao sucesso da séries de filmes) e filmes praticamente desconhecidos de tão inexpressivos como _The Flowers of War_ de 2011.
+
+<h2>I'm Not Hipster</h2>
+Se você já conheceu alguém que se diz (ou é) hipster provavelmente essa pessoa já deve ter assistido _American Hustle_ de 2013, que por acaso é muito bem avaliado pelos hipsters, ops __usuários__ do Rotten Tomatoes. A maioria dos filmes dessa categoria se encaixa nessa descrição, apesar da baixa bilheteria de alguns.
+
+<h2>The Beginning</h2>
+Esse grupo de filmes provavelmente é o que deixaria Bale mais feliz, pois foi com _Batman Begins_ que a trilogia sucesso de bilheteria do Batman começou a a decolar e fez com que Bale nadasse em rios de dinheiro. Merecido porém, uma vez que os três filmes são no minímo razoáveis.
+
+<h2>The Rise</h2>
+Ambos os filmes desse grupo dispensam comentários, principalmente _The Dark Knight_ de 2008 onde tivemos um __Ledger__ inspirado como Coringa e Bale no auge de sua forma física e de sua habilidade de atuação, um filme simplesmente brilhante e que merecidamente arrecadou bastante dinheiro.
+

@@ -1,13 +1,13 @@
 # Site settings
-title:        "block-Log"
-description:  "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolor"
+title:        "Blog - Análise de Dados I"
+description:  "Neste blog estarei publicando as análises feitas na disciplina de Análise de Dados I do curso de ciência da computação da UFCG"
 baseurl:      "" # the subpath of your site, e.g. /blog/
-url:          "http://yourdomain.com" # the base hostname & protocol for your site
+url:          "http://lucasdiniz.github.io" # the base hostname & protocol for your site
 permalink:    /:year/:title
-github:       "yourusername"
-twitter:      "yourusername"
-email:        "mail@example.com"
-disqus-id:    "example" #leave blank if you dont want comments.
+github:       "lucasdiniz"
+twitter:      "stalkerdiniz"
+email:        "lucazdinis@gmail.com"
+disqus-id:    "" #leave blank if you dont want comments.
 
 # Build settings
 markdown:     kramdown
